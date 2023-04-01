@@ -27,3 +27,41 @@ class GeneticAlgorithm(Generic[C]):
 
     def _pick_roulette(self, wheel: List[float]) -> Tuple[C,C]:
         return tuple(choices(self._population, weights=wheel, k=2))
+
+    def _pick_tournament(self, num_participent: int) -> Tuple[C, C]:
+        participant: List[C]=choices(self._population, k=num_participent)
+        return tuple(nlargest(2, participant, key=self._fitness_key))
+
+    def _reproduce_and_replace(self) -> None:
+        new_population: List[C] = []
+        while len(new_population) < len(self._population):
+            if self._selection_type == GeneticAlgorithm.SelectionType.ROULETTE:
+                parents: Tuple[C, C] = self._pick_roulette([x.fitness() for x in self._population])
+            else:
+                parents = self._pick_tournament(len(self._population) // 2)
+
+            if random() < self._crossover_chance:
+                new_population.extend(parents[0].crossover(parents[1]))
+            else:
+                new_population.extend(parents)
+        if len(new_population) > len(self._population):
+            new_population.pop()
+        self._population = new_population
+
+    def _mutate(self) -> None:
+        for individ in self._population:
+            if random() < self._mutation_chance:
+                individ.mutate()
+
+    def run(self) -> C:
+        best: C = max(self._population, key=self._fitness_key)
+        for gener in range(self._max_generations):
+            if best.fitness() >= self._threshold:
+                return best
+            print(f"Generation {gener} Best {best.fitness()} Avg {mean(map(self._fitness_key, self._population))}")
+            self._reproduce_and_replace()
+            self._mutate()
+            highest: C = max(self._population, key=self._fitness_key)
+            if highest.fitness() > best.fitness():
+                best = highest
+        return best
