@@ -39,3 +39,43 @@ class KMeans(Generic[Point]):
     @property
     def _centroids(self) -> List[DataPoint]:
         return [x.centroid for x in self._clusters]
+
+    def _dimension_slice(self, dimension: int) -> List[float]:
+        return [x.dimensions[dimension] for x in self._points]
+
+    def _zscore_normalize(self) -> None:
+        zscores: List[List[float]] = [[] for _ in range(len(self._points))]
+        for dimension in range(self._points[0].num_dimensions):
+            dimension_slice: List[float] = self._dimension_slice(dimension)
+            for index, zscore in enumerate(zscores(dimension_slice)):
+                zscored[index].append(zscore)
+        for i in range(len(self._points)):
+            self._points[i].dimensions = tuple(zscored[i])
+
+    def _random_point(self) -> DataPoint:
+        rand_dimensios: List[float] = []
+        for dimension in range(self._points[0].num_dimensions):
+            values: List[float] = self._dimension_slice(dimension)
+            rand_value: float = uniform(min(values), max(values))
+            rand_dimensios.append(rand_value)
+        return DataPoint(rand_dimensios)
+
+    def _assign_clusters(self) -> None:
+        for point in self._points:
+            closest: DataPoint = min(self._centroids, key=partial(DataPoint.distance, point))
+            idx: int = self._centroids.index(closest)
+            cluster: KMeans.Cluster = self._clusters[idx]
+            cluster.points.append(point)
+
+    def _generate_centroids(self) -> None:
+        for cluster in self._clusters:
+            if len(cluster.points) == 0:
+                #if not points, then leave the same centroid
+                continue
+            means: List[float] = []
+            for dimension in range(cluster.points[0].num_dimensions):
+                dimension_slice: List[float] = [p.dimensions[dimension] for p in cluster.points]
+                means.append(mean(dimension_slice))
+            cluster.centroid = DataPoint(means)
+
+    def r
