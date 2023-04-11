@@ -41,7 +41,7 @@ Governor(-111.862434, 70, "Utah"), Governor(-72.710686, 58, "Vermont"), \
 Governor(-78.169968, 60, "Virginia"), Governor(-121.490494, 66, "Washington"), \
 Governor(-80.954453, 66, "West Virginia"), Governor(-89.616508, 49, "Wisconsin"), \
 Governor(-107.30249, 55, "Wyoming")]
-    kmeans: KMeans[Governor] = KMeans(2, governors)
+    kmeans: KMeans[Governor] = KMeans(5, governors)
     gov_clusters: List[KMeans.Cluster] = kmeans.run()
     for index, cluster in enumerate(gov_clusters):
         print(f'Cluster {index}: {cluster.points}\n')
